@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Äventyrsstund på Atir</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
+    <style>
+        :root {
+            --primary-color: #0d0d2b;
+            --secondary-color: #1b1b3a;
+            --accent-color: #ff003c;
+            --highlight-color: #00ffff;
+            --text-color: #ffffff;
+        }
+
+        body {
+            background: var(--primary-color);
+            color: var(--text-color);
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            scroll-behavior: smooth;
+        }
+
+        header {
+            background: var(--secondary-color);
+            padding: 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 1.2rem;
+            padding: 10px 15px;
+            transition: all 0.3s ease-in-out;
+            border-bottom: 2px solid transparent;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--highlight-color);
+            border-bottom: 2px solid var(--highlight-color);
+        }
+
+        main {
+            padding-top: 80px;
+        }
+
+        section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 20px;
+        }
+
+        .hero-bios {
+            position: relative;
+            width: 300px;
+            overflow: hidden;
+        }
+
+        .bio {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .bio img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .bio.active {
+            opacity: 1;
+            position: relative;
+        }
+
+        .carousel-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .carousel-btn {
+            background: var(--highlight-color);
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        footer {
+            background: var(--secondary-color);
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Äventyrsstund på Atir</h1>
+        <nav>
+            <a href="#bio">Bios</a>
+            <a href="#blog">Blog</a>
+            <a href="#donations">Donations</a>
+        </nav>
+        <button class="donate-btn">Support Us on Patreon</button>
+    </header>
+
+    <main>
+        <section id="bio">
+            <h2>Meet the Adventurers</h2>
+            <div class="hero-bios">
+                <div class="bio active" id="hero1">
+                    <img src="Sara.jpg" alt="Hero 1">
+                    <p>Sara - The fearless leader of the adventure squad.</p>
+                </div>
+                <div class="bio" id="hero2">
+                    <img src="Omran.jpg" alt="Hero 2">
+                    <p>Omran - The tech genius and strategist.</p>
+                </div>
+				<div class="bio" id="hero2">
+                    <img src="Faroud.jpg" alt="Hero 2">
+                    <p>Faroud - The Pilot.</p>
+                </div>
+            </div>
+            <div class="carousel-controls">
+                <button class="carousel-btn" id="prev">&#9664;</button>
+                <button class="carousel-btn" id="next">&#9654;</button>
+            </div>
+        </section>
+
+        <section id="blog">
+            <h2>Adventure Logs</h2>
+            <div id="blog-posts"></div>
+        </section>
+
+        <section id="donations">
+            <h2>Donation Goals</h2>
+            <div class="goal">
+                <p>Next Mission Fund</p>
+                <progress value="50" max="100"></progress>
+            </div>
+            <h3>Hall of Fame</h3>
+            <ul id="donor-list"></ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Äventyrsstund på Atir</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const bios = document.querySelectorAll(".bio");
+            let currentIndex = 0;
+            const navLinks = document.querySelectorAll("nav a");
+
+            function updateBio(index) {
+                bios.forEach(bio => bio.classList.remove("active"));
+                bios[index].classList.add("active");
+            }
+
+            document.getElementById("next").addEventListener("click", () => {
+                currentIndex = (currentIndex + 1) % bios.length;
+                updateBio(currentIndex);
+            });
+
+            document.getElementById("prev").addEventListener("click", () => {
+                currentIndex = (currentIndex - 1 + bios.length) % bios.length;
+                updateBio(currentIndex);
+            });
+
+            window.addEventListener("scroll", () => {
+                let current = "";
+                document.querySelectorAll("section").forEach((section) => {
+                    const sectionTop = section.offsetTop - 100;
+                    if (window.scrollY >= sectionTop) {
+                        current = section.getAttribute("id");
+                    }
+                });
+                navLinks.forEach((link) => {
+                    link.classList.remove("active");
+                    if (link.getAttribute("href").substring(1) === current) {
+                        link.classList.add("active");
+                    }
+                });
+            });
+
+            fetch("blog.json")
+                .then(response => response.json())
+                .then(data => {
+                    const blogContainer = document.getElementById("blog-posts");
+                    data.forEach(post => {
+                        const postElement = document.createElement("div");
+                        postElement.classList.add("blog-post");
+                        postElement.innerHTML = `<h3>${post.title}</h3><p>${post.content}</p>`;
+                        blogContainer.appendChild(postElement);
+                    });
+                })
+                .catch(error => console.error("Error loading blog posts:", error));
+        });
+    </script>
+</body>
+</html>
